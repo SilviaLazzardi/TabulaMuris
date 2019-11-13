@@ -22,6 +22,7 @@ def plot_qc(path_data, path_save):
         organ_data=np.load(str(path_data_), allow_pickle=True)
         
         organ_counts=organ_data[1:][:,1:]
+        n_cells=organ_counts.shape[1]
         
         # COUNT DEPHT
         organ_counts_cells=np.sum(organ_counts,axis=0)
@@ -30,6 +31,7 @@ def plot_qc(path_data, path_save):
         
         for i in range(organ_counts.shape[1]):
             organ_counts_genes[i]=np.argwhere(organ_counts[:,i]!=0).shape[0]
+            #print(organ_counts_genes[i])
         
         count_depth_genes=np.zeros((organ_counts_cells.shape[0],2))
         for i in range(organ_counts_cells.shape[0]):
@@ -40,15 +42,17 @@ def plot_qc(path_data, path_save):
         count_depth_genes=count_depth_genes[idx]
         
         organ_name=organ.split(sep='.')[0]
+        organ_name=organ_name.split(sep='-')[0]
         
-        plt.figure(figsize=(10,10))
+        plt.figure(figsize=(14,10))
         title='{} QC'.format(organ_name)
         plt.title(title)
         
         plt.subplot(2,2,1)
-        
+        hist= np.histogram(organ_counts_cells, bins=np.unique(organ_counts_cells).shape[0])
         plt.hist(organ_counts_cells, bins=np.unique(organ_counts_cells).shape[0])
-        plt.xlim(left=-10000, right=np.max(organ_counts_cells)+20)
+        plt.xlim(left=-100000, right=np.max(organ_counts_cells)+20)
+        plt.ylim(top=np.max(hist[0]+10))
         plt.ylabel('Frequency')
         plt.xlabel('Count depth')
         
@@ -60,11 +64,12 @@ def plot_qc(path_data, path_save):
 
         plt.subplot(2,2,3)
         plt.semilogy(np.sort(organ_counts_cells)[::-1],marker='.')
+        plt.plot(np.repeat(1200, n_cells))
         plt.ylabel('Count depth') 
         plt.xlabel('Barcode Rank')
         
         plt.subplot(2,2,4)
-        plt.plot(count_depth_genes[:,1], count_depth_genes[:,0], 'bo', markersize=2)    
+        plt.plot( count_depth_genes[:,0],count_depth_genes[:,1], 'bo', markersize=2)    
         plt.ylabel('Number of genes')
         plt.xlabel('Count depth')       
         
@@ -82,8 +87,8 @@ def main():
     # VARIABLES     
     #path_data = args.path_data
     #path_save= args.path_save
-    path_data=Path('/home/silvia/Desktop/BORSA/SPECIAL_ISSUE/mypyhon/data/raw_matrices_FACS')
-    path_save=Path('/home/silvia/Desktop/BORSA/SPECIAL_ISSUE/mypyhon/QC/FACS')
+    path_data=Path('/home/slazzardi/Desktop/SPECIAL_ISSUE/mypyhon/data/raw_matrices_FACS')
+    path_save=Path('/home/slazzardi/Desktop/SPECIAL_ISSUE/mypyhon/preprocessing/QC_plots')
     plot_qc(path_data, path_save)
     
 if __name__=='__main__':
